@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Group Number Calculator</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #212529;
+        }
+
+        /* Dark mode variables */
+        .dark-mode {
+            --primary-color: #4cc9f0;
+            --secondary-color: #7209b7;
+            --accent-color: #f72585;
+            --background-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 20px 10px;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .container {
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            max-width: 600px;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(67, 97, 238, 0.1) 0%, rgba(248, 249, 250, 0) 70%);
+            transform: translate(var(--x, 0), var(--y, 0));
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Dark mode toggle switch */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 50px;
+        }
+
+        .theme-switch input {
+            display: none;
+        }
+
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            background-color: white;
+            bottom: 4px;
+            content: "";
+            height: 16px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 16px;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Add these styles */
+        .theme-icon-sun {
+            margin-right: 6px; /* Space between sun emoji and switch */
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            top: -6px;
+            vertical-align: middle;
+        }
+
+        .theme-icon-moon {
+            margin-left: 6px; /* Space between switch and moon emoji */
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            top: -6px;
+            vertical-align: middle;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 24px;
+            position: relative;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 10px;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            text-align: left;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            outline: none;
+        }
+
+        /* Student number digit fields */
+        .digit-input-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .digit-input {
+            flex: 1;
+            min-width: 35px;
+            max-width: 45px;
+            height: 50px;
+            text-align: center;
+            font-size: 18px;
+            padding: 5px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        /* Hide number input arrows */
+        .digit-input::-webkit-outer-spin-button,
+        .digit-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .digit-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .digit-input.filled {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 25px;
+            font-size: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        button:active::after {
+            animation: ripple 0.6s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: var(--background-color);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            min-height: 100px;
+            text-align: left;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .result-content {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .binary-visualization {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 3px;
+        }
+
+        .bit {
+            width: 25px;
+            height: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid #e0e0e0;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .bit.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .bit.highlight {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(247, 37, 133, 0.3);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .visualization-label {
+            width: 100%;
+            text-align: left;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+            font-size: 13px;
+        }
+
+        .group-result {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.1));
+            text-align: center;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+        
+        .loading div {
+            position: absolute;
+            top: 33px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+        
+        .loading div:nth-child(1) {
+            left: 8px;
+            animation: loading1 0.6s infinite;
+        }
+        
+        .loading div:nth-child(2) {
+            left: 8px;
+            animation: loading2 0.6s infinite;
+        }
+        
+        .loading div:nth-child(3) {
+            left: 32px;
+            animation: loading2 0.6s infinite;
+        }
+        
+        .loading div:nth-child(4) {
+            left: 56px;
+            animation: loading3 0.6s infinite;
+        }
+        
+        @keyframes loading1 {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes loading3 {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); }
+        }
+        
+        @keyframes loading2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(24px, 0); }
+        }
+
+        /* Media queries for responsive design */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+                width: 98%;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            .digit-input {
+                min-width: 30px;
+                max-width: 40px;
+                height: 45px;
+                font-size: 16px;
+            }
+            
+            .bit {
+                width: 22px;
+                height: 22px;
+                font-size: 12px;
+            }
+            
+            .group-result {
+                font-size: 18px;
+            }
+            
+            .visualization-label {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 350px) {
+            .digit-input {
+                min-width: 25px;
+                max-width: 30px;
+                height: 40px;
+                font-size: 14px;
+            }
+            
+            .bit {
+                width: 20px;
+                height: 20px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="container">
+        <div class="theme-switch-wrapper">
+            <span class="theme-icon-sun">☀️</span>
+            <label class="theme-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+            <span class="theme-icon-moon">🌙</span>
+        </div>
+        <h2>Group Number Calculator</h2>
+        <div class="input-group">
+            <label for="studentNumber">Student Number (6 digits):</label>
+            <div class="digit-input-container">
+                <input type="tel" class="digit-input" id="digit1" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="tel" class="digit-input" id="digit2" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="tel" class="digit-input" id="digit3" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="tel" class="digit-input" id="digit4" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="tel" class="digit-input" id="digit5" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="tel" class="digit-input" id="digit6" maxlength="1" pattern="[0-9]" inputmode="numeric">
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="bitmask">Test Bitmask:</label>
+            <input type="text" id="bitmask" placeholder="Enter bitmask (e.g. 1010)" inputmode="numeric" maxlength="8">
+        </div>
+        <button onclick="calculateGroup()">Calculate Group</button>
+        <div id="result">
+            <div class="result-content">Enter values above and click Calculate</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Configure particles background
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adjust particle density based on screen width
+            let particleCount = window.innerWidth < 768 ? 40 : 80;
+            
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": particleCount,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#4361ee"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.5,
+                        "random": false
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#4361ee",
+                        "opacity": 0.4,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": window.innerWidth > 768, // Disable hover effect on mobile
+                            "mode": "repulse"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "repulse": {
+                            "distance": 100,
+                            "duration": 0.4
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+            
+            // Setup digit input fields
+            setupDigitInputs();
+
+            const bitmaskInput = document.getElementById('bitmask');
+            bitmaskInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^01]/g, '');
+            });
+
+            // Setup theme toggle
+            setupThemeToggle();
+        });
+
+        // Setup theme toggle functionality
+        function setupThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            // Check for saved theme preference or prefer-color-scheme
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
+                document.body.classList.add('dark-mode');
+                themeToggle.checked = true;
+                updateParticlesColor('#4cc9f0'); // Update particles color for dark mode
+            }
+            
+            // Listen for toggle changes
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                    updateParticlesColor('#4cc9f0'); // Update particles color for dark mode
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                    updateParticlesColor('#4361ee'); // Update particles color for light mode
+                }
+            });
+        }
+
+        // Function to update particles color
+        function updateParticlesColor(color) {
+            if (window.pJSDom && window.pJSDom[0] && window.pJSDom[0].pJS) {
+                const particles = window.pJSDom[0].pJS.particles;
+                particles.color.value = color;
+                particles.line_linked.color = color;
+                
+                // Update existing particles
+                for (let i = 0; i < particles.array.length; i++) {
+                    particles.array[i].color.value = color;
+                }
+            }
+        }
+
+        // Interactive container glow effect - only on non-mobile devices
+        const container = document.querySelector('.container');
+        if (window.innerWidth > 768) {
+            document.addEventListener('mousemove', function(e) {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                container.style.setProperty('--x', `${x}px`);
+                container.style.setProperty('--y', `${y}px`);
+            });
+        }
+
+        // For touch devices - simplified effect
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                const rect = container.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                container.style.setProperty('--x', `${x}px`);
+                container.style.setProperty('--y', `${y}px`);
+            }
+        });
+
+        // Setup the digit input fields
+        function setupDigitInputs() {
+            const digitInputs = document.querySelectorAll('.digit-input');
+            
+            digitInputs.forEach((input, index) => {
+                // Handle input
+                input.addEventListener('input', function(e) {
+                    // Allow only numbers
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    
+                    if (this.value) {
+                        this.classList.add('filled');
+                        
+                        // Auto-focus next input if available
+                        if (index < digitInputs.length - 1) {
+                            digitInputs[index + 1].focus();
+                        } else {
+                            // Focus on bitmask input after last digit
+                            document.getElementById('bitmask').focus();
+                        }
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                });
+                
+                // Handle backspace to go to previous input
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && index > 0) {
+                        digitInputs[index - 1].focus();
+                    }
+                });
+                
+                // Handle paste
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    if (/^\d+$/.test(pastedText)) {
+                        const digits = pastedText.split('');
+                        
+                        // Fill as many inputs as we can with the pasted digits
+                        for (let i = 0; i < Math.min(digitInputs.length - index, digits.length); i++) {
+                            digitInputs[index + i].value = digits[i];
+                            digitInputs[index + i].classList.add('filled');
+                            
+                            // Focus the next empty input or the last one
+                            if (index + i + 1 < digitInputs.length) {
+                                digitInputs[index + i + 1].focus();
+                            } else {
+                                document.getElementById('bitmask').focus();
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Focus first digit input on page load
+            digitInputs[0].focus();
+            
+            // Add keyboard event listener for enter key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    calculateGroup();
+                }
+            });
+        }
+
+        // Get the student number from digit inputs
+        function getStudentNumber() {
+            let studentNumber = '';
+            const digitInputs = document.querySelectorAll('.digit-input');
+            
+            digitInputs.forEach(input => {
+                studentNumber += input.value || '0'; // Use '0' as default for empty inputs
+            });
+            
+            return studentNumber;
+        }
+
+        function calculateGroup() {
+            let studentNumber = getStudentNumber();
+            let bitmask = document.getElementById("bitmask").value;
+            let resultDiv = document.getElementById("result");
+            
+            if (!studentNumber || studentNumber.length !== 6 || !bitmask.match(/^[01]+$/)) {
+                resultDiv.innerHTML = "<div class='result-content'>Please enter a valid 6-digit student number and bitmask.</div>";
+                return;
+            }
+            
+            // Show loading animation
+            resultDiv.innerHTML = "<div class='loading'><div></div><div></div><div></div><div></div></div>";
+            
+            // Delay for animation effect
+            setTimeout(() => {
+                let binaryStudentNumber = (parseInt(studentNumber, 10) >>> 0).toString(2);
+                let last8Bits = binaryStudentNumber.slice(-8).padStart(8, '0');
+                let selectedBits = "";
+                
+                // Create visualization HTML
+                let htmlContent = "<div class='result-content'>";
+                
+                // Original binary representation
+                htmlContent += `<div class='visualization-label'>Student Number (${studentNumber}) in Binary:</div>`;
+                htmlContent += "<div class='binary-visualization'>";
+                for (let i = 0; i < binaryStudentNumber.length; i++) {
+                    htmlContent += `<div class='bit'>${binaryStudentNumber[i]}</div>`;
+                }
+                htmlContent += "</div>";
+                
+                // Last 8 bits
+                htmlContent += "<div class='visualization-label'>Last 8 Bits:</div>";
+                htmlContent += "<div class='binary-visualization'>";
+                for (let i = 0; i < 8; i++) {
+                    htmlContent += `<div class='bit ${i < 8 ? 'active' : ''}'>${last8Bits[i]}</div>`;
+                }
+                htmlContent += "</div>";
+                
+                // Bitmask
+                htmlContent += "<div class='visualization-label'>Test Bitmask:</div>";
+                htmlContent += "<div class='binary-visualization'>";
+                
+                // Padding for alignment
+                let padding = 8 - bitmask.length;
+                for (let i = 0; i < padding; i++) {
+                    htmlContent += "<div class='bit' style='opacity: 0.3;'>-</div>";
+                }
+                
+                for (let i = 0; i < bitmask.length; i++) {
+                    htmlContent += `<div class='bit ${bitmask[i] === '1' ? 'active' : ''}'>${bitmask[i]}</div>`;
+                }
+                htmlContent += "</div>";
+                
+                // Selected bits visualization
+                htmlContent += "<div class='visualization-label'>Selected Bits (where bitmask is 1):</div>";
+                htmlContent += "<div class='binary-visualization'>";
+                
+                for (let i = 0; i < padding; i++) {
+                    htmlContent += "<div class='bit' style='opacity: 0.3;'>-</div>";
+                }
+                
+                for (let i = 0; i < bitmask.length; i++) {
+                    let realIndex = 8 - bitmask.length + i;
+                    if (realIndex >= 0 && realIndex < 8) {
+                        let isSelected = bitmask[i] === '1';
+                        
+                        if (isSelected) {
+                            selectedBits = selectedBits + last8Bits[realIndex];
+                            htmlContent += `<div class='bit active highlight'>${last8Bits[realIndex]}</div>`;
+                        } else {
+                            htmlContent += "<div class='bit' style='opacity: 0.3;'>-</div>";
+                        }
+                    }
+                }
+                htmlContent += "</div>";
+                
+                // Calculate group number
+                let decimalGroupNumber = selectedBits ? parseInt(selectedBits, 2) : 0;
+                
+                // Final result
+                htmlContent += `<div class='group-result'>Group Number: ${decimalGroupNumber} (Binary: ${selectedBits || '0'})</div>`;
+                
+                htmlContent += "</div>";
+                resultDiv.innerHTML = htmlContent;
+                
+                // Animate bits
+                const bits = document.querySelectorAll('.bit');
+                bits.forEach((bit, index) => {
+                    setTimeout(() => {
+                        bit.style.opacity = "1";
+                    }, index * 50);
+                });
+                
+            }, 800); // Delay for effect
+        }
+    </script>
+</body>
+</html>
